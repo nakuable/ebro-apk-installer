@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EBRO S700 & Desay SV | WebUSB Sideload Hub</title>
+  <meta name="description" content="Instalador web de aplicaciones para coches EBRO S700 y plataformas Desay SV mediante WebUSB y ADB nativo.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Top Header -->
+    <header>
+      <div class="logo-group">
+        <div class="brand-badge">EBRO</div>
+        <div class="header-titles">
+          <h1>Sideload Web Hub</h1>
+          <p>Instalador directo en navegador vía WebUSB para Desay SV / Chery / EBRO</p>
+        </div>
+      </div>
+
+      <div id="status-pill" class="status-pill">
+        <span class="status-dot"></span>
+        <span id="status-text">Desconectado</span>
+      </div>
+    </header>
+
+    <!-- Chrome / Edge WebUSB Info Banner -->
+    <div class="info-banner">
+      <div class="info-icon">⚡</div>
+      <div>
+        <strong>Sin programas ni drivers:</strong> Esta herramienta funciona directamente desde <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong> mediante el estándar WebUSB. Si tienes algún ADB ejecutándose en tu ordenador, ciérralo antes de conectar.
+      </div>
+    </div>
+
+    <!-- Connection Section -->
+    <section class="glass-card connect-hero">
+      <div class="connect-action-row">
+        <div>
+          <div class="card-title">
+            <span class="icon">🔌</span>
+            <span>Conexión con el Vehículo</span>
+          </div>
+          <p class="connect-desc">
+            Conecta el puerto USB de depuración de tu EBRO al ordenador con un cable USB. Luego presiona el botón para autorizar la conexión en tu navegador.
+          </p>
+        </div>
+        <button id="btn-connect" class="btn btn-primary">
+          <span>⚡ Conectar Coche por USB</span>
+        </button>
+      </div>
+
+      <!-- Vehicle Specs (Visible upon connection) -->
+      <div id="device-details" class="device-grid" style="display: none;">
+        <div class="device-item">
+          <div class="device-item-label">Modelo Detectado</div>
+          <div id="val-model" class="device-item-val">-</div>
+        </div>
+        <div class="device-item">
+          <div class="device-item-label">Plataforma / SoC</div>
+          <div id="val-soc" class="device-item-val">-</div>
+        </div>
+        <div class="device-item">
+          <div class="device-item-label">Versión Android</div>
+          <div id="val-android" class="device-item-val">-</div>
+        </div>
+        <div class="device-item">
+          <div class="device-item-label">Firmware</div>
+          <div id="val-firmware" class="device-item-val">-</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress Bar (Visible during download / install) -->
+    <div id="progress-container" class="progress-container">
+      <div class="progress-header">
+        <span id="progress-text">Procesando...</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="progress-bar" class="progress-bar-fill"></div>
+      </div>
+    </div>
+
+    <!-- Main Sideload Center -->
+    <section class="glass-card">
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="tab-catalog">Catálogo de Apps</button>
+        <button class="tab-btn" data-tab="tab-github">Instalar desde GitHub</button>
+        <button class="tab-btn" data-tab="tab-local">Subir APK Local</button>
+      </div>
+
+      <!-- Tab 1: Community Catalog -->
+      <div id="tab-catalog" class="tab-pane active">
+        <div class="catalog-grid">
+          
+          <!-- Ebro Horizon Beta -->
+          <div class="app-card">
+            <div>
+              <div class="app-header">
+                <div class="app-icon">🏎️</div>
+                <div class="app-info">
+                  <h3>Ebro Horizon Beta</h3>
+                  <span class="tag">EBRO Custom</span>
+                </div>
+              </div>
+              <p class="app-desc">
+                Dashboard personalizado para EBRO con telemetría del coche (batería, neumáticos, consumo y velocidad).
+              </p>
+            </div>
+            <button class="btn btn-primary btn-catalog-install" data-name="Ebro Horizon Beta" data-url="ehbeta-v214.apk">
+              <span>Instalar Horizon</span>
+            </button>
+          </div>
+
+          <!-- Floating Dock -->
+          <div class="app-card">
+            <div>
+              <div class="app-header">
+                <div class="app-icon">🔘</div>
+                <div class="app-info">
+                  <h3>Floating Dock</h3>
+                  <span class="tag">TR4314 / Desay</span>
+                </div>
+              </div>
+              <p class="app-desc">
+                Botón flotante siempre visible en pantalla para acceder y cambiar rápidamente entre tus apps instaladas.
+              </p>
+            </div>
+            <button class="btn btn-ghost btn-catalog-install" data-name="Floating Dock" data-repo="joshepw/FloatingDock">
+              <span>Instalar Dock</span>
+            </button>
+          </div>
+
+          <!-- SmartTube -->
+          <div class="app-card">
+            <div>
+              <div class="app-header">
+                <div class="app-icon">📺</div>
+                <div class="app-info">
+                  <h3>SmartTube</h3>
+                  <span class="tag">arm64-v8a</span>
+                </div>
+              </div>
+              <p class="app-desc">
+                Cliente de YouTube sin anuncios adaptado para pantallas táctiles y sistemas multimedia de automóviles.
+              </p>
+            </div>
+            <button class="btn btn-ghost btn-catalog-install" data-name="SmartTube" data-repo="yuliskov/SmartTube">
+              <span>Instalar SmartTube</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tab 2: GitHub URL -->
+      <div id="tab-github" class="tab-pane">
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Introduce el nombre del repositorio de GitHub (ej: <code>yuliskov/SmartTube</code>) o un enlace directo a un archivo <code>.apk</code> en GitHub Releases. El navegador descargará el asset compatible e inyectará la instalación.
+          </p>
+          <div class="input-row">
+            <input type="text" id="input-github-url" class="text-input" placeholder="ej: yuliskov/SmartTube o https://github.com/.../app.apk">
+            <button id="btn-install-github" class="btn btn-accent">
+              <span>⬇ Descargar e Instalar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Local File -->
+      <div id="tab-local" class="tab-pane">
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-icon">📦</div>
+          <div class="drop-title">Arrastra tu archivo .apk aquí</div>
+          <div class="drop-sub">o haz clic en el botón para buscarlo en tu ordenador</div>
+          <button id="btn-browse" class="btn btn-ghost">Examinar Archivo .apk</button>
+          <input type="file" id="file-input" accept=".apk" style="display: none;">
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Terminal / Console Logs -->
+    <section class="glass-card terminal-card">
+      <div class="terminal-header">
+        <div class="terminal-title">
+          <div class="terminal-dots">
+            <span class="t-dot red"></span>
+            <span class="t-dot yellow"></span>
+            <span class="t-dot green"></span>
+          </div>
+          <span>Registro de Instalación & ADB</span>
+        </div>
+        <button id="btn-clear-logs" class="btn btn-ghost" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">Limpiar</button>
+      </div>
+      <div id="terminal-body" class="terminal-body">
+        <div class="log-line log-info">
+          <span class="log-time">[00:00:00]</span>
+          <span class="log-msg">Sistema listo. Conecta tu EBRO S700 por USB y pulsa "Conectar Coche por USB".</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      EBRO S700 WebADB Sideload Hub · Compatible con plataformas Desay SV / Chery / Ebro · 100% Client-Side WebUSB
+    </footer>
+
+  </div>
+
+  <!-- Tab Switching Script -->
+  <script>
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.getAttribute('data-tab');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+
+  <!-- Main ES Module -->
+  <script type="module" src="app.js"></script>
+
+</body>
+</html>
