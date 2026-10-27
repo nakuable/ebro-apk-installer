@@ -45,12 +45,17 @@
             <span>Conexión con el Vehículo</span>
           </div>
           <p class="connect-desc">
-            Conecta el puerto USB de depuración de tu EBRO al ordenador con un cable USB. Luego presiona el botón para autorizar la conexión en tu navegador.
+            Conecta tu EBRO al ordenador con un cable USB. En el diálogo del navegador, si aparecen varios dispositivos (CarPlay y ADB), nuestro sistema resolverá y conectará automáticamente la interfaz de depuración real.
           </p>
         </div>
-        <button id="btn-connect" class="btn btn-primary">
-          <span>⚡ Conectar Coche por USB</span>
-        </button>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+          <button id="btn-connect" class="btn btn-primary">
+            <span>⚡ Conectar por WebUSB</span>
+          </button>
+          <button id="btn-connect-local" class="btn btn-accent" style="display: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <span>💻 Conectar por ADB Local</span>
+          </button>
+        </div>
       </div>
 
       <!-- Vehicle Specs (Visible upon connection) -->
@@ -91,6 +96,13 @@
         <button class="tab-btn active" data-tab="tab-catalog">Catálogo de Apps</button>
         <button class="tab-btn" data-tab="tab-github">Instalar desde GitHub</button>
         <button class="tab-btn" data-tab="tab-local">Subir APK Local</button>
+        <button class="tab-btn" data-tab="tab-uninstall">
+          <span>🗑️ Desinstalar Apps</span>
+          <span id="badge-uninstall-count" class="badge-count" style="display: none;">0</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-ota">
+          <span>🔑 Activar ADB (OTA)</span>
+        </button>
       </div>
 
       <!-- Tab 1: Community Catalog -->
@@ -111,9 +123,14 @@
                 Dashboard personalizado para EBRO con telemetría del coche (batería, neumáticos, consumo y velocidad).
               </p>
             </div>
-            <button class="btn btn-primary btn-catalog-install" data-name="Ebro Horizon Beta" data-url="ehbeta-v214.apk">
-              <span>Instalar Horizon</span>
-            </button>
+            <div class="catalog-card-actions">
+              <button class="btn btn-primary btn-catalog-install" data-name="Ebro Horizon Beta" data-url="ehbeta-v214.apk">
+                <span>Instalar Horizon</span>
+              </button>
+              <button class="btn btn-danger-outline btn-catalog-uninstall" data-pkg="com.ebro.horizon.beta,com.ebro.cardash" data-name="Ebro Horizon Beta" title="Desinstalar Horizon del coche">
+                <span>🗑️ Desinstalar</span>
+              </button>
+            </div>
           </div>
 
           <!-- Floating Dock -->
@@ -130,9 +147,14 @@
                 Botón flotante siempre visible en pantalla para acceder y cambiar rápidamente entre tus apps instaladas.
               </p>
             </div>
-            <button class="btn btn-ghost btn-catalog-install" data-name="Floating Dock" data-repo="joshepw/FloatingDock">
-              <span>Instalar Dock</span>
-            </button>
+            <div class="catalog-card-actions">
+              <button class="btn btn-ghost btn-catalog-install" data-name="Floating Dock" data-repo="joshepw/FloatingDock">
+                <span>Instalar Dock</span>
+              </button>
+              <button class="btn btn-danger-outline btn-catalog-uninstall" data-pkg="com.teamsun.floatingdock,com.teamsun.dock" data-name="Floating Dock" title="Desinstalar Floating Dock del coche">
+                <span>🗑️ Desinstalar</span>
+              </button>
+            </div>
           </div>
 
           <!-- SmartTube -->
@@ -149,9 +171,14 @@
                 Cliente de YouTube sin anuncios adaptado para pantallas táctiles y sistemas multimedia de automóviles.
               </p>
             </div>
-            <button class="btn btn-ghost btn-catalog-install" data-name="SmartTube" data-repo="yuliskov/SmartTube">
-              <span>Instalar SmartTube</span>
-            </button>
+            <div class="catalog-card-actions">
+              <button class="btn btn-ghost btn-catalog-install" data-name="SmartTube" data-repo="yuliskov/SmartTube">
+                <span>Instalar SmartTube</span>
+              </button>
+              <button class="btn btn-danger-outline btn-catalog-uninstall" data-pkg="com.liskovsoft.videomanager,com.liskovsoft.smarttubetv.beta" data-name="SmartTube" title="Desinstalar SmartTube del coche">
+                <span>🗑️ Desinstalar</span>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -183,7 +210,286 @@
         </div>
       </div>
 
+      <!-- Tab 4: Uninstall / Package Manager -->
+      <div id="tab-uninstall" class="tab-pane">
+        <div class="uninstall-container">
+          
+          <!-- Top Controls & Search Bar -->
+          <div class="uninstall-toolbar">
+            <div class="uninstall-intro">
+              <h3>Gestor de Aplicaciones y Desinstalación</h3>
+              <p>Inspecciona las apps instaladas en tu EBRO S700, desinstala paquetes de terceros o limpia su caché y datos.</p>
+            </div>
+            <div class="toolbar-actions">
+              <button id="btn-refresh-packages" class="btn btn-ghost" title="Leer paquetes instalados desde el coche">
+                <span class="refresh-icon">🔄</span>
+                <span>Leer Apps del Coche</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter Pills & Search Input -->
+          <div class="uninstall-filter-row">
+            <div class="filter-pills">
+              <button class="filter-chip active" data-filter="third-party">
+                <span>Apps de Terceros</span>
+                <span id="chip-count-3rd" class="chip-badge">0</span>
+              </button>
+              <button class="filter-chip" data-filter="catalog">
+                <span>Catálogo Sideload</span>
+                <span id="chip-count-cat" class="chip-badge">0</span>
+              </button>
+              <button class="filter-chip" data-filter="system">
+                <span>Sistema / OEM</span>
+                <span id="chip-count-sys" class="chip-badge">0</span>
+              </button>
+              <button class="filter-chip" data-filter="all">
+                <span>Todas</span>
+                <span id="chip-count-all" class="chip-badge">0</span>
+              </button>
+            </div>
+
+            <div class="search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="search-packages" class="search-input" placeholder="Buscar por nombre o paquete...">
+              <button id="btn-clear-search" class="search-clear-btn" style="display: none;">✕</button>
+            </div>
+          </div>
+
+          <!-- Apps List Container -->
+          <div id="packages-list" class="packages-list">
+            <!-- Empty state when not loaded -->
+            <div class="empty-state">
+              <div class="empty-icon">📱</div>
+              <h4>No se han cargado las aplicaciones</h4>
+              <p>Conecta tu EBRO S700 por USB y pulsa en <strong>"Leer Apps del Coche"</strong> para listar todas las aplicaciones instaladas.</p>
+              <button id="btn-read-apps-empty" class="btn btn-accent" style="margin-top: 1rem;">
+                <span>🔄 Leer Aplicaciones Instaladas</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Manual Package Uninstaller Card -->
+          <div class="manual-uninstall-card">
+            <div class="manual-uninstall-header">
+              <div class="manual-title">
+                <span class="icon">⚡</span>
+                <span>Desinstalación Manual por Nombre de Paquete</span>
+              </div>
+              <span class="tag">Avanzado</span>
+            </div>
+            <p class="manual-desc">
+              Si conoces el nombre de paquete exacto (ej. <code>com.ebro.horizon.beta</code> o <code>com.liskovsoft.videomanager</code>), puedes desinstalarlo directamente sin buscarlo en la lista.
+            </p>
+            <div class="input-row">
+              <input type="text" id="input-manual-package" class="text-input" placeholder="ej: com.ebro.horizon.beta">
+              <button id="btn-manual-uninstall" class="btn btn-danger">
+                <span>🗑️ Desinstalar Paquete</span>
+              </button>
+            </div>
+            <div class="manual-options">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="check-manual-user0" checked>
+                <span>Forzar desinstalación para Usuario 0 (<code>--user 0</code>) <em class="muted-note">(Recomendado)</em></span>
+              </label>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="check-manual-keepdata">
+                <span>Conservar datos y caché de la app (<code>-k</code>)</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tab 5: OTA ADB Activation Key Calculator -->
+      <div id="tab-ota" class="tab-pane">
+        <div class="ota-container">
+          
+          <!-- Hero Banner -->
+          <div class="ota-hero">
+            <div class="ota-hero-icon">🔓</div>
+            <div class="ota-hero-content">
+              <h3>Activar Depuración ADB en el Coche (CarotaOTA)</h3>
+              <p>
+                Si tu coche no tiene el puerto ADB habilitado, puedes activarlo de fábrica sin necesidad de desbloqueos complejos: abre la app <strong>CarotaOTA</strong> ➔ <strong>EngineModeActivity</strong>, introduce la contraseña de 6 dígitos calculada según el bastidor (VIN) y la fecha de hoy, y pulsa <strong>"Open ADB"</strong>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Calculator and Steps Grid -->
+          <div class="ota-grid">
+            
+            <!-- Left: Interactive Calculator -->
+            <div class="ota-card">
+              <div class="ota-card-title">
+                <span>🧮</span>
+                <span>Calculadora de Contraseña EngineMode</span>
+              </div>
+
+              <!-- VIN Input -->
+              <div class="ota-form-group">
+                <label for="input-ota-vin" class="ota-label">
+                  <span>Número de Bastidor (VIN) o últimos 6 dígitos</span>
+                  <span id="label-vin-digits" class="ota-helper">6 dígitos requeridos</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="input-ota-vin" 
+                  class="text-input" 
+                  placeholder="ej: LVVDB21B... o 123456" 
+                  maxlength="20"
+                  autocomplete="off"
+                  spellcheck="false"
+                  style="text-transform: uppercase; font-family: var(--font-mono); font-weight: 600;"
+                >
+                <div id="ota-vin-preview" class="ota-helper">
+                  Introduce el VIN completo o solo los últimos 6 números.
+                </div>
+              </div>
+
+              <!-- Date Input -->
+              <div class="ota-form-group">
+                <label for="input-ota-date" class="ota-label">
+                  <span>Fecha de la pantalla del coche</span>
+                  <span id="label-date-yymmdd" class="ota-helper" style="font-family: var(--font-mono);">yyMMdd: -</span>
+                </label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="date" id="input-ota-date" class="text-input" style="flex: 1;">
+                  <button id="btn-ota-today" class="btn btn-secondary" style="padding: 0.5rem 0.85rem; font-size: 0.82rem;" title="Usar fecha de hoy">
+                    <span>Hoy</span>
+                  </button>
+                </div>
+                <div class="ota-helper">
+                  La fecha debe coincidir con la que muestra el reloj del coche (formato Año-Mes-Día).
+                </div>
+              </div>
+
+              <!-- Calculated PIN Result Box -->
+              <div class="ota-pin-box">
+                <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                  Contraseña de Acceso (6 dígitos)
+                </div>
+
+                <div class="ota-digits-row" id="ota-digits-container">
+                  <div class="ota-digit empty">-</div>
+                  <div class="ota-digit empty">-</div>
+                  <div class="ota-digit empty">-</div>
+                  <div class="ota-digit empty">-</div>
+                  <div class="ota-digit empty">-</div>
+                  <div class="ota-digit empty">-</div>
+                </div>
+
+                <div class="ota-formula-tag">
+                  Fórmula: <code>((VIN_6 + 123456) × yyMMdd) mod 1.000.000</code>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; width: 100%; justify-content: center; margin-top: 0.25rem;">
+                  <button id="btn-copy-pin" class="btn btn-primary" style="flex: 1; max-width: 260px;" disabled>
+                    <span>📋 Copiar PIN</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right: Instructions and Technical Notes -->
+            <div class="ota-card">
+              <div class="ota-card-title">
+                <span>📋</span>
+                <span>Instrucciones en la Pantalla del Coche</span>
+              </div>
+
+              <div class="ota-steps-list">
+                <div class="ota-step-item">
+                  <div class="ota-step-num">1</div>
+                  <div class="ota-step-text">
+                    <h4>Abrir la aplicación CarotaOTA</h4>
+                    <p>En el menú de aplicaciones o en Ajustes ➔ Sistema ➔ Actualizaciones, abre la herramienta oficial <strong>CarotaOTA</strong>.</p>
+                  </div>
+                </div>
+
+                <div class="ota-step-item">
+                  <div class="ota-step-num">2</div>
+                  <div class="ota-step-text">
+                    <h4>Acceder a EngineModeActivity</h4>
+                    <p>Toca de 5 a 10 veces seguidas sobre el logo o el número de versión hasta que aparezca la ventana de contraseña de ingeniería.</p>
+                  </div>
+                </div>
+
+                <div class="ota-step-item">
+                  <div class="ota-step-num">3</div>
+                  <div class="ota-step-text">
+                    <h4>Escribir el código calculado</h4>
+                    <p>Introduce la contraseña de 6 dígitos generada en esta calculadora para la fecha exacta del coche.</p>
+                  </div>
+                </div>
+
+                <div class="ota-step-item">
+                  <div class="ota-step-num">4</div>
+                  <div class="ota-step-text">
+                    <h4>Pulsar "Open ADB"</h4>
+                    <p>Dentro del menú oculto, localiza el interruptor o botón <strong>"Open ADB"</strong> y actívalo. El puerto USB del coche quedará desbloqueado.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Technical Bypass Note -->
+              <div class="modal-alert-box" style="margin-top: 0.5rem; background: rgba(0, 229, 255, 0.06); border-color: rgba(0, 229, 255, 0.25); color: #80deea;">
+                <span>💡 <strong>Bypass de Restricción Integrado:</strong> En las versiones modernas de firmware (SOP6/SOP7), el sistema bloquea <code>pm install</code> (DISALLOW_INSTALL_APPS). Esta web utiliza automáticamente la inyección de sesión nativa Java (<code>PackageInstaller.Session</code> vía SessionWriter / Monji), por lo que una vez abras el ADB podrás instalar cualquier APK sin bloqueos.</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
     </section>
+
+    <!-- Modal Confirm Uninstall -->
+    <div id="modal-uninstall" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span class="modal-warn-icon">⚠️</span>
+            <span>Confirmar Desinstalación</span>
+          </div>
+          <button id="btn-close-modal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-app-preview">
+            <div id="modal-app-icon" class="modal-app-icon">📦</div>
+            <div class="modal-app-info">
+              <h4 id="modal-app-name">Nombre de App</h4>
+              <code id="modal-app-pkg">com.ejemplo.paquete</code>
+              <div id="modal-app-badges" class="modal-app-badges" style="margin-top: 0.35rem;"></div>
+            </div>
+          </div>
+          <div id="modal-admin-warning" class="modal-alert-box" style="display: none;">
+            <span>🛡️ <strong>Permiso de Administrador detectado:</strong> Se desactivará automáticamente antes de desinstalar para evitar bloqueos del sistema.</span>
+          </div>
+          <p class="modal-question">¿Seguro que deseas desinstalar esta aplicación del sistema de tu coche?</p>
+          <div class="modal-options">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="modal-opt-user0" checked>
+              <span>Desinstalar para usuario actual (<code>--user 0</code>)</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="modal-opt-keepdata">
+              <span>Conservar datos y caché (<code>-k</code>)</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-modal-cancel" class="btn btn-ghost">Cancelar</button>
+          <button id="btn-modal-confirm" class="btn btn-danger">
+            <span>🗑️ Sí, Desinstalar</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Terminal / Console Logs -->
     <section class="glass-card terminal-card">
@@ -227,7 +533,7 @@
   </script>
 
   <!-- Main ES Module -->
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=2.6.0"></script>
 
 </body>
 </html>

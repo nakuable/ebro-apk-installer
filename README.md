@@ -61,6 +61,23 @@ En unos segundos, tendrás tu propio instalador disponible en:
 
 ---
 
+## 🗑️ Cómo desinstalar aplicaciones y gestionar paquetes
+
+La pestaña **"🗑️ Desinstalar Apps"** te permite gestionar por completo las aplicaciones instaladas en tu vehículo:
+
+* **Lectura automática:** Al conectar el coche, se analizan automáticamente las aplicaciones de terceros y de fábrica instaladas.
+* **Filtro y buscador instantáneo:** Filtra por *Apps de Terceros*, *Catálogo Sideload*, o *Sistema*, o utiliza el buscador para localizar cualquier paquete en tiempo real.
+* **Desinstalación segura con 1 clic:** 
+  * Permite desinstalar para el usuario actual (`--user 0`) para eludir bloqueos de fábrica.
+  * Opción de conservar datos y caché (`-k`).
+  * **Bypass de Administrador de Dispositivo:** Si una aplicación tiene permisos de administrador activo (Device Admin, como ciertos dashboards o herramientas de telemetría), el instalador revoca automáticamente los privilegios antes de desinstalar para evitar errores `DELETE_FAILED_DEVICE_POLICY_MANAGER`.
+* **Limpieza de datos (`pm clear`):** Restablece cualquier app corrupta o con fallos sin necesidad de desinstalarla.
+* **Forzar detención (`am force-stop`):** Detén procesos en segundo plano que consuman recursos.
+* **Desinstalación manual:** Introduce cualquier identificador de paquete (`com.ejemplo.app`) para eliminarlo directamente.
+* **Acceso directo desde el Catálogo:** Las tarjetas de *Ebro Horizon Beta*, *Floating Dock* y *SmartTube* disponen de su propio botón de desinstalación rápida y marcan con un badge verde si la app ya está instalada.
+
+---
+
 ## 🔒 Privacidad y Seguridad
 * **100% en el navegador (Client-Side):** Ni los archivos ni tus credenciales se envían a ningún servidor externo.
 * Las claves criptográficas RSA de ADB se generan de forma segura en tu propio navegador usando la API Web Crypto (`IndexedDB`).
